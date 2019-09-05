@@ -7,8 +7,11 @@ def escutarCliente(con):
         if not msg: break
         print(str(msg, 'utf-8'))
 
+def criptografar(msg):
+    return msg
+
 tcp = socket(AF_INET, SOCK_STREAM)
-tcp.bind(('127.0.0.1', 5047))
+tcp.bind(('', 5200))
 tcp.listen(1)
 
 print('Servidor iniciado')
@@ -22,7 +25,7 @@ threadEscutar.start()
 
 mensagem = input()
 while True:
-    conexao.send(mensagem.encode())
+    conexao.send(criptografar(mensagem).encode())
     mensagem = input()
 
 threadEscutar.join()
