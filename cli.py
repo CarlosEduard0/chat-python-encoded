@@ -1,6 +1,7 @@
 from socket import socket,AF_INET,SOCK_STREAM
 from threading import Thread
 from SDES import SDes
+from rc4 import RC4
 import sys
 
 class Send:
@@ -22,10 +23,9 @@ def waitForMessage(tcp, send, host, port):
     while True:
         msg = tcp.recv(1024)
         if not msg: break
-        print('Servidor: {}'.format(str(msg, 'utf-8')))
         msg = algCriptografia.decifrarMensagem(str(msg, 'utf-8'))
         if msg.startswith('chave '):
-            algCriptografia.setChave(int(msg.split(' ')[1]))
+            trocarChave(msg)
             print('====================================')
             print('=== Chave alterada pelo Servidor ===')
             print('====================================')
@@ -38,12 +38,15 @@ def waitForMessage(tcp, send, host, port):
             print('Servidor: {}'.format(msg))
 
 def trocarAlgoritmoDeCriptografia(mensagem):
+    global algCriptografia
     algoritmo = mensagem.split(' ')[1]
     if algoritmo == 's-des':
         algCriptografia = SDes(1)
+    elif algoritmo == 'rc4':
+        algCriptografia = RC4('chave')
 
 def trocarChave(mensagem):
-    algCriptografia.setChave(int(mensagem.split(' ')[1]))
+    algCriptografia.setChave(mensagem.split(' ')[1])
 
 # __ main __
 serverIP = (str(sys.argv[1]))
@@ -62,7 +65,6 @@ algCriptografia = SDes(1)
 # send messages
 while (True):
     message = input()
-    print('Cliente: {}'.format(algCriptografia.cifrarMensagem(message)))
     send.put(algCriptografia.cifrarMensagem(message))
     if message.startswith('chave '):
         trocarChave(message)

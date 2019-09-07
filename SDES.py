@@ -90,4 +90,4 @@ class SDes:
         return resultado
     
     def setChave(self, chave):
-        self.chave = bin(chave)[2:].zfill(10)
+        self.chave = bin(int(chave))[2:].zfill(10)
