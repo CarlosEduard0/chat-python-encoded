@@ -1,16 +1,33 @@
 import sys
 from SDES import SDes
 
-# nomeArquivoTextoClaro = sys.argv[1]
-# arquivoTextoClaro = open(nomeArquivoTextoClaro, 'r')
 
-s = SDes(
-    [3, 5, 2, 7, 4, 10, 1, 9, 8, 6], # Pbox10
-    [6, 3, 7, 4, 8, 5, 10, 9], # Pbox8
-    [2, 6, 3, 1, 4, 8, 5, 7], # IP
-    [4, 1, 2, 3, 2, 3, 4, 1], # epBox
-    [2, 4, 3, 1],
-    '1010000010'
-)
-s.cifrar('a')
-# arquivoTextoClaro.close()
+def menu():
+    global modo, nomeArquivoInput, nomeArquivoOutput
+    modo = int(input('Digite o mode de operação\n0 - Cifrar\n1 - Decifrar\n'))
+    if modo:
+        nomeArquivoInput = input('Digite o nome  do arquivo criptografado: ')
+    else:
+        nomeArquivoInput = input('Digite o nome do arquivo em texto claro: ')
+    nomeArquivoOutput = input('Digite o nome do arquivo de saída do resultado: ')
+
+modo = 0
+nomeArquivoInput = ''
+nomeArquivoOutput = ''
+menu()
+
+arquivoInput = open(nomeArquivoInput, 'r')
+arquivoOutput = open(nomeArquivoOutput, 'w')
+
+s = SDes(4)
+while True:
+    c = arquivoInput.read(1)
+    if not c:
+        break;
+    if modo:
+        arquivoOutput.write(s.decifrar(c))
+    else:
+        arquivoOutput.write(s.cifrar(c))
+
+arquivoOutput.close()
+arquivoInput.close()

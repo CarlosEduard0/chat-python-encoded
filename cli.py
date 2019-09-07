@@ -1,5 +1,6 @@
 from socket import socket,AF_INET,SOCK_STREAM
 from threading import Thread
+from SDES import SDes
 import sys
 
 class Send:
@@ -19,8 +20,30 @@ def waitForMessage(tcp, send, host, port):
     send.connection = tcp
     print ("Connected to ", host, ':', port)
     while True:
-        print ("Server:", str(tcp.recv(1024), 'utf-8'))
+        msg = tcp.recv(1024)
+        if not msg: break
+        print('Servidor: {}'.format(str(msg, 'utf-8')))
+        msg = algCriptografia.decifrarMensagem(str(msg, 'utf-8'))
+        if msg.startswith('chave '):
+            algCriptografia.setChave(int(msg.split(' ')[1]))
+            print('====================================')
+            print('=== Chave alterada pelo Servidor ===')
+            print('====================================')
+        elif msg.startswith('algoritmo '):
+            trocarAlgoritmoDeCriptografia(msg)
+            print('========================================')
+            print('=== Algoritmo alterado pelo Servidor ===')
+            print('========================================')
+        else:
+            print('Servidor: {}'.format(msg))
 
+def trocarAlgoritmoDeCriptografia(mensagem):
+    algoritmo = mensagem.split(' ')[1]
+    if algoritmo == 's-des':
+        algCriptografia = SDes(1)
+
+def trocarChave(mensagem):
+    algCriptografia.setChave(int(mensagem.split(' ')[1]))
 
 # __ main __
 serverIP = (str(sys.argv[1]))
@@ -34,7 +57,14 @@ send = Send()
 process = Thread(target=waitForMessage, args=(mySocket, send, serverIP, sysPort))
 process.start()
 
+algCriptografia = SDes(1)
+
 # send messages
 while (True):
     message = input()
-    send.put(user + ': ' + message)
+    print('Cliente: {}'.format(algCriptografia.cifrarMensagem(message)))
+    send.put(algCriptografia.cifrarMensagem(message))
+    if message.startswith('chave '):
+        trocarChave(message)
+    elif message.startswith('algoritmo '):
+        trocarAlgoritmoDeCriptografia(message)
