@@ -24,13 +24,16 @@ def escutarCliente(con):
 def trocarAlgoritmoDeCriptografia(mensagem):
     global algCriptografia
     algoritmo = mensagem.split(' ')[1]
+    chave = mensagem.split(' ')[2]
     if algoritmo == 's-des':
         algCriptografia = SDes(1)
     elif algoritmo == 'rc4':
         algCriptografia = RC4('chave')
 
-def trocarChave(mensagem):
-    algCriptografia.setChave(mensagem.split(' ')[1])
+def enviarMensagem(mensagem):
+    if algCriptografia != None:
+        mensagem = algCriptografia.cifrarMensagem(mensagem)
+    conexao.send(mensagem.encode())
 
 tcp = socket(AF_INET, SOCK_STREAM)
 tcp.bind(('', 5354))
@@ -49,10 +52,8 @@ algCriptografia = SDes(1)
 
 while True:
     mensagem = input()
-    conexao.send(algCriptografia.cifrarMensagem(mensagem).encode())
-    if mensagem.startswith('chave '):
-        trocarChave(mensagem)
-    elif mensagem.startswith('algoritmo '):
+    enviarMensagem(mensagem)
+    if mensagem.startswith('\crypt '):
         trocarAlgoritmoDeCriptografia(mensagem)
 
 threadEscutar.join()
