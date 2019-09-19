@@ -3,22 +3,14 @@ import threading
 from SDES import SDes
 from rc4 import RC4
 
-class Servidor:
-    def __init__(self, host = '127.0.0.1', porta = 8080, algCriptografia = None):
-        self.host = host
-        self.porta = porta
-        self.algCriptografia = algCriptografia
-    
-    def iniciar(self):
-        tcp = socket(AF_INET, SOCK_STREAM)
-        tcp.bind((self.host, self.porta))
-        tcp.listen(1)
-        print('Servidor iniciado\nAguardando cliente conectar')
-        self.conexao, self.cliente = tcp.accept()
-        print('Cliente {} conectado'.format(self.cliente))
-        threading.Thread(target = self.escutarCliente).start()
+class Cliente:
+    def conectar(self, host, porta, algCriptografia = None):
+        self.conexao = socket(AF_INET, SOCK_STREAM)
+        self.conexao.connect((host, porta))
+        print('Cliente conectado no servidor {} na porta {}'.format(host, porta))
+        threading.Thread(target = self.escutarServidor).start()
 
-    def escutarCliente(self):
+    def escutarServidor(self):
         while True:
             mensagem = self.conexao.recv(1024)
             if not mensagem: break
@@ -42,9 +34,9 @@ class Servidor:
     def enviarMensagem(self, mensagem):
         self.conexao.send(mensagem.encode())
 
-servidor = Servidor(porta = 5355)
-servidor.iniciar()
+cliente = Cliente()
+cliente.conectar('127.0.0.1', 5355)
 
 while True:
     mensagem = input()
-    servidor.enviarMensagem(mensagem)
+    cliente.enviarMensagem(mensagem)
