@@ -5,26 +5,20 @@ from rc4 import RC4
 from diffie_hellman import DiffieHellMan
 
 
-class Servidor:
-    def __init__(self, host='127.0.0.1', porta=8080, diffie_hellman=None, algCriptografia=None):
-        self.host = host
-        self.porta = porta
-        self.algCriptografia = algCriptografia
-        self.conexao = None
-        self.cliente = None
+class Cliente:
+    def __init__(self, diffie_hellman):
         self.diffie_hellman = diffie_hellman
+        self.conexao = None
+        self.algCriptografia = None
 
-    def iniciar(self):
-        tcp = socket(AF_INET, SOCK_STREAM)
-        tcp.bind((self.host, self.porta))
-        tcp.listen(1)
-        print('Servidor iniciado\nAguardando cliente conectar')
-        self.conexao, self.cliente = tcp.accept()
-        print('Cliente {} conectado'.format(self.cliente))
+    def conectar(self, host, porta):
+        self.conexao = socket(AF_INET, SOCK_STREAM)
+        self.conexao.connect((host, porta))
+        print('Cliente conectado no servidor {} na porta {}'.format(host, porta))
         self.trocar_chaves_diffie()
-        threading.Thread(target=self.escutar_cliente).start()
+        threading.Thread(target=self.escutar_servidor).start()
 
-    def escutar_cliente(self):
+    def escutar_servidor(self):
         while True:
             msg = self.conexao.recv(1024)
             if not msg:
@@ -59,16 +53,21 @@ class Servidor:
         return msg
 
     def trocar_chaves_diffie(self):
-        chave_publica = int(str(self.conexao.recv(1024), 'utf-8'))
         self.enviar_mensagem(str(self.diffie_hellman.y))
+        chave_publica = int(str(self.conexao.recv(1024), 'utf-8'))
         self.diffie_hellman.calcular_chave(chave_publica)
-        self.enviar_mensagem(str(self.diffie_hellman.k))
+        chave_recebida = int(str(self.conexao.recv(2014), 'utf-8'))
+        if self.diffie_hellman.k == chave_recebida:
+            print('Chaves trocadas com sucesso')
+        else:
+            print('As chaves geradas não são iguais')
+            exit(1)
 
 
-servidor = Servidor(porta=5354, diffie_hellman=DiffieHellMan(353, 3))
-servidor.iniciar()
+cliente = Cliente(DiffieHellMan(353, 3))
+cliente.conectar('127.0.0.1', 5354)
 
 while True:
     mensagem = input()
-    servidor.enviar_mensagem(mensagem)
-    servidor.tratar_mensagem(mensagem)
+    cliente.enviar_mensagem(mensagem)
+    cliente.tratar_mensagem(mensagem)

@@ -11,7 +11,7 @@ def menu():
         chave = input('Digite a chave: ')
         algCriptografia = RC4(chave)
     else:
-        chave = int(input('Digite um número inteiro para ser a chave: '))
+        chave = input('Digite 10 bits para ser a chave: ')
         algCriptografia = SDes(chave)
     if modo:
         nomeArquivoInput = input('Digite o nome  do arquivo criptografado: ')
