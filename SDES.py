@@ -1,9 +1,9 @@
 class SDes:
     def __init__(self, 
-        chave, 
-        pbox10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6], 
-        pbox8 = [6, 3, 7, 4, 8, 5, 10, 9], 
-        ip = [2, 6, 3, 1, 4, 8, 5, 7], 
+        chave,
+        pbox10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6],
+        pbox8 = [6, 3, 7, 4, 8, 5, 10, 9],
+        ip = [2, 6, 3, 1, 4, 8, 5, 7],
         ip1 = [4, 1, 3, 5, 7, 2, 8, 6], 
         epbox = [4, 1, 2, 3, 2, 3, 4, 1],
         pbox4 = [2, 4, 3, 1],
@@ -16,7 +16,7 @@ class SDes:
         self.ip1 = ip1
         self.epbox = epbox
         self.pbox4 = pbox4
-        self.chave = bin(chave)[2:].zfill(10)
+        self.chave = chave
         self.s0 = s0
         self.s1 = s1
 
@@ -88,6 +88,3 @@ class SDes:
         for i in range(len(bits1)):
             resultado.append('1') if bits1[i] != bits2[i] else resultado.append('0')
         return resultado
-    
-    def setChave(self, chave):
-        self.chave = bin(int(chave))[2:].zfill(10)
